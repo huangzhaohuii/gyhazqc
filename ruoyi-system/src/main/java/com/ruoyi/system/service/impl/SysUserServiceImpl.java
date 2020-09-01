@@ -2,6 +2,8 @@ package com.ruoyi.system.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ruoyi.common.core.redis.RedisCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ import com.ruoyi.system.mapper.SysUserPostMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysUserService;
+
+import javax.annotation.PostConstruct;
 
 /**
  * 用户 业务层处理
@@ -52,6 +56,20 @@ public class SysUserServiceImpl implements ISysUserService
 
     @Autowired
     private ISysConfigService configService;
+
+    @Autowired
+    private RedisCache redisCache;
+
+    /**
+     * 项目启动时，初始化用户信息到缓存
+     */
+    @PostConstruct
+    public void init(){
+        List<SysUser> sysUsers = userMapper.selectUserList(new SysUser());
+        for (SysUser user : sysUsers) {
+            redisCache.setCacheObject(user.getUserName(),user.getNickName());
+        }
+    }
 
     /**
      * 根据条件分页查询用户列表

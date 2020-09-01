@@ -9,7 +9,8 @@ ruoyi:
   # 实例演示开关
   demoEnabled: true
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
-  profile: D:/ruoyi/uploadPath
+#  profile: D:/ruoyi/uploadPath
+  profile: /home/business/uploadPath
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数组计算 char 字符验证
@@ -18,10 +19,10 @@ ruoyi:
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
-  port: 8080
+  port: 7004
   servlet:
     # 应用的访问路径
-    context-path: /
+    context-path: /bussiness
   tomcat:
     # tomcat的URI编码
     uri-encoding: UTF-8
@@ -76,7 +77,18 @@ spring:
         max-active: 8
         # #连接池最大阻塞等待时间（使用负值表示没有限制）
         max-wait: -1ms
-
+  mail:
+    host: smtp.163.com
+    username: GuiyangGangjiegou@163.com
+    password: JPNNXVSJNGPROMMP
+    properties:
+      mail:
+        smtp:
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+      ##         ssl:
+      ##           enable :true
+      default-encoding: utf-8
 # token配置
 token:
     # 令牌自定义标识

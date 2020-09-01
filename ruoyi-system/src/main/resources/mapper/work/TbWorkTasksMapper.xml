@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.work.mapper.TbWorkTasksMapper">
+
+    <resultMap type="com.ruoyi.work.domain.TbWorkTasks" id="TbWorkTasksResult">
+        <result property="id"    column="id"    />
+        <result property="manageType"    column="manage_type"    />
+        <result property="workSection"    column="work_section"    />
+        <result property="workLine"    column="work_line"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="workTasks"    column="work_tasks"    />
+        <result property="workTitle"    column="work_title"    />
+        <result property="completion"    column="completion"    />
+        <result property="importance"    column="importance"    />
+        <result property="timeBegin"    column="time_begin"    />
+        <result property="timeEnd"    column="time_end"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="completeTime"    column="complete_time"    />
+        <result property="createName"    column="create_name"    />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.analysis.domain.AnalysisInfo" id="AnalysisInfo">
+        <result property="createName" column = "create_name" />
+<!--        <collection property="taskList" ofType="com.ruoyi.analysis.domain.QuantityInfo">-->
+            <result property="count" column="count"></result>
+            <result property="completion" column="completion"></result>
+<!--        </collection>-->
+    </resultMap>
+
+    <sql id="selectTbWorkTasksVo">
+        select id, manage_type, work_section, work_line, create_by, work_tasks, work_title,completion, importance, time_begin, time_end, create_time,complete_time,create_name from tb_work_tasks
+    </sql>
+
+    <select id="selectTbWorkTasksList" parameterType="com.ruoyi.work.domain.TbWorkTasks" resultMap="TbWorkTasksResult">
+        <include refid="selectTbWorkTasksVo"/>
+        <where>
+            <if test="manageType != null  and manageType != ''"> and manage_type = #{manageType}</if>
+            <if test="workSection != null  and workSection != ''"> and work_section = #{workSection}</if>
+            <if test="workLine != null  and workLine != ''"> and work_line = #{workLine}</if>
+            <if test="workTasks != null  and workTasks != ''"> and work_tasks = #{workTasks}</if>
+            <if test="workTitle != null  and workTitle != ''"> and work_title like '%' || #{workTitle} || '%'</if>
+            <if test="completion != null  and completion != ''"> and completion = #{completion}</if>
+            <if test="importance != null  and importance != ''"> and importance = #{importance}</if>
+            <if test="timeBegin != null  and timeBegin != ''"> and time_begin = #{timeBegin}</if>
+            <if test="timeEnd != null  and timeEnd != ''"> and time_end = #{timeEnd}</if>
+            <if test="createTime != null  and createTime != ''"> and create_time = #{createTime}</if>
+            <if test="createBy != null  and createBy != ''"> and create_by like CONCAT('%',#{createBy},'%')</if>
+            <if test="completeTime != null  and completeTime != ''"> and complete_time = #{completeTime}</if>
+            <if test="createName != null  and createName != ''"> and create_name like CONCAT('%',#{createName},'%')</if>
+        </where>
+        order by time_begin desc
+    </select>
+
+    <select id="selectTbWorkTasksById" parameterType="String" resultMap="TbWorkTasksResult">
+        <include refid="selectTbWorkTasksVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="getAnalysisData" resultMap="AnalysisInfo">
+        SELECT t.create_name,t.completion,COUNT(*) count FROM (
+            SELECT * FROM tb_work_tasks
+                <where>
+                    <if test="createName != null  and createName != ''"> and create_name = #{createName}</if>
+                    <if test="timeEnd != null  and timeEnd != ''"> and time_end &lt;= #{timeEnd}</if>
+                    <if test="timeBegin != null  and timeBegin != ''"> and time_begin >= #{timeBegin}</if>
+                </where>
+            ) t GROUP BY t.completion,t.create_name ORDER BY create_name
+    </select>
+    <select id="getAnalysisCount" resultType="java.util.Map">
+        SELECT t.create_name countName,COUNT(*) count FROM (SELECT * FROM tb_work_tasks
+            <where>
+                <if test="createName != null  and createName != ''"> and create_name = #{createName}</if>
+                <if test="timeEnd != null  and timeEnd != ''"> and time_end &lt;= #{timeEnd}</if>
+                <if test="timeBegin != null  and timeBegin != ''"> and time_begin >= #{timeBegin}</if>
+            </where>
+        ) t GROUP BY t.create_name ORDER BY create_name
+    </select>
+
+    <select id="getUndoCount" resultType="java.util.Map">
+        SELECT t.create_by name,COUNT(*) count FROM (SELECT * FROM tb_work_tasks
+        WHERE completion = '000702' AND time_end &lt; curdate()
+        <if test="createBy != '' and createBy != null">
+            AND create_by = #{createBy}
+        </if>
+        ) t GROUP BY t.create_by ORDER BY create_by
+    </select>
+
+    <select id="selectTbWorkTasksUndoList" parameterType="com.ruoyi.work.domain.TbWorkTasks" resultMap="TbWorkTasksResult">
+        <include refid="selectTbWorkTasksVo"/>
+        <where>
+            <if test="manageType != null  and manageType != ''"> and manage_type = #{manageType}</if>
+            <if test="workSection != null  and workSection != ''"> and work_section = #{workSection}</if>
+            <if test="workLine != null  and workLine != ''"> and work_line = #{workLine}</if>
+            <if test="workTasks != null  and workTasks != ''"> and work_tasks = #{workTasks}</if>
+            <if test="workTitle != null  and workTitle != ''"> and work_title like '%' || #{workTitle} || '%'</if>
+            and completion = '000702'
+            <if test="importance != null  and importance != ''"> and importance = #{importance}</if>
+            <if test="timeBegin != null  and timeBegin != ''"> and time_begin = #{timeBegin}</if>
+            and time_end &lt; curdate()
+            <if test="createTime != null  and createTime != ''"> and create_time = #{createTime}</if>
+            <if test="createBy != null  and createBy != ''"> and create_by like CONCAT('%',#{createBy},'%')</if>
+            <if test="completeTime != null  and completeTime != ''"> and complete_time = #{completeTime}</if>
+            <if test="createName != null  and createName != ''"> and create_name like CONCAT('%',#{createName},'%')</if>
+        </where>
+        order by time_begin desc
+    </select>
+
+    <select id="exportExcel" resultType="com.ruoyi.work.domain.TbWorkTasks">
+        SELECT
+        d1.dict_label as manageType,
+        d2.dict_label as workLine,
+        d3.dict_label as workSection,
+        t.work_title as workTitle,
+        t.work_tasks as workTasks,
+        d4.dict_label as `completion`,
+        d5.dict_label as importance,
+        t.time_begin as timeBegin,
+        t.time_end as timeEnd,
+        date_format(t.create_time, '%Y-%m-%d %H:%i:%s') as createTime,
+        t.complete_time as completeTime,
+        t.create_name as createName
+        FROM
+        `tb_work_tasks` t
+        LEFT JOIN sys_dict_data d1 ON d1.dict_value = t.manage_type
+        LEFT JOIN sys_dict_data d2 ON d2.dict_value = t.work_line
+        LEFT JOIN sys_dict_data d3 ON d3.dict_value = t.work_section
+        LEFT JOIN sys_dict_data d4 ON d4.dict_value = t.`completion`
+        LEFT JOIN sys_dict_data d5 ON d5.dict_value = t.importance
+        <where>
+            <if test="manageType != null  and manageType != ''"> and t.manage_type = #{manageType}</if>
+            <if test="workSection != null  and workSection != ''"> and t.work_section = #{workSection}</if>
+            <if test="workLine != null  and workLine != ''"> and t.work_line = #{workLine}</if>
+            <if test="workTasks != null  and workTasks != ''"> and t.work_tasks = #{workTasks}</if>
+            <if test="workTitle != null  and workTitle != ''"> and t.work_title like '%' || #{workTitle} || '%'</if>
+            <if test="completion != null  and completion != ''"> and t.completion = #{completion}</if>
+            <if test="importance != null  and importance != ''"> and t.importance = #{importance}</if>
+            <if test="timeBegin != null  and timeBegin != ''"> and t.time_begin = #{timeBegin}</if>
+            <if test="timeEnd != null  and timeEnd != ''"> and t.time_end = #{timeEnd}</if>
+            <if test="createTime != null  and createTime != ''"> and t.create_time = #{createTime}</if>
+            <if test="createBy != null  and createBy != ''"> and t.create_by like CONCAT('%',#{createBy},'%')</if>
+            <if test="completeTime != null  and completeTime != ''"> and t.complete_time = #{completeTime}</if>
+            <if test="createName != null  and createName != ''"> and t.create_name like CONCAT('%',#{createName},'%')</if>
+        </where>
+        order by t.create_time desc
+    </select>
+
+
+    <insert id="insertTbWorkTasks" parameterType="com.ruoyi.work.domain.TbWorkTasks">
+        insert into tb_work_tasks
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="manageType != null">manage_type,</if>
+            <if test="workSection != null">work_section,</if>
+            <if test="workLine != null">work_line,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="workTasks != null">work_tasks,</if>
+            <if test="workTitle != null">work_title,</if>
+            <if test="completion != null">completion,</if>
+            <if test="importance != null">importance,</if>
+            <if test="timeBegin != null">time_begin,</if>
+            <if test="timeEnd != null">time_end,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="completeTime != null">complete_time,</if>
+            <if test="createName != null">create_name,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="manageType != null">#{manageType},</if>
+            <if test="workSection != null">#{workSection},</if>
+            <if test="workLine != null">#{workLine},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="workTasks != null">#{workTasks},</if>
+            <if test="workTitle != null">#{workTitle},</if>
+            <if test="completion != null">#{completion},</if>
+            <if test="importance != null">#{importance},</if>
+            <if test="timeBegin != null">#{timeBegin},</if>
+            <if test="timeEnd != null">#{timeEnd},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="completeTime != null">#{completeTime},</if>
+            <if test="createName != null">#{createName},</if>
+        </trim>
+    </insert>
+
+    <update id="updateTbWorkTasks" parameterType="com.ruoyi.work.domain.TbWorkTasks">
+        update tb_work_tasks
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="manageType != null">manage_type = #{manageType},</if>
+            <if test="workSection != null">work_section = #{workSection},</if>
+            <if test="workLine != null">work_line = #{workLine},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="workTasks != null">work_tasks = #{workTasks},</if>
+            <if test="workTitle != null">work_title = #{workTitle},</if>
+            <if test="completion != null">completion = #{completion},</if>
+            <if test="importance != null">importance = #{importance},</if>
+            <if test="timeBegin != null">time_begin = #{timeBegin},</if>
+            <if test="timeEnd != null">time_end = #{timeEnd},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTbWorkTasksById" parameterType="String">
+        delete from tb_work_tasks where id = #{id}
+    </delete>
+
+    <delete id="deleteTbWorkTasksByIds" parameterType="String">
+        delete from tb_work_tasks where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

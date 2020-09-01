@@ -2,6 +2,8 @@ package com.ruoyi.system.service.impl;
 
 import java.util.List;
 import javax.annotation.PostConstruct;
+
+import com.ruoyi.common.core.redis.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,18 +31,24 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
     @Autowired
     private SysDictDataMapper dictDataMapper;
 
+    @Autowired
+    private RedisCache redisCache;
     /**
      * 项目启动时，初始化字典到缓存
      */
     @PostConstruct
     public void init()
     {
-        List<SysDictType> dictTypeList = dictTypeMapper.selectDictTypeAll();
-        for (SysDictType dictType : dictTypeList)
-        {
-            List<SysDictData> dictDatas = dictDataMapper.selectDictDataByType(dictType.getDictType());
-            DictUtils.setDictCache(dictType.getDictType(), dictDatas);
+        List<SysDictData> sysDictDatas = dictDataMapper.selectDictDataList(new SysDictData());
+        for (SysDictData  sysDictData: sysDictDatas) {
+            redisCache.setCacheObject(sysDictData.getDictValue(),sysDictData.getDictLabel());
         }
+
+        List<SysDictType> sysDictTypes = dictTypeMapper.selectDictTypeAll();
+        for (SysDictType sysDictType: sysDictTypes) {
+            redisCache.setCacheObject(sysDictType.getDictType(),sysDictType.getDictName());
+        }
+
     }
 
     /**

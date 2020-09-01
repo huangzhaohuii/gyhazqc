@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.site.mapper.TbSiteManageMapper">
+    
+    <resultMap type="com.ruoyi.site.domain.TbSiteManage" id="TbSiteManageResult">
+        <result property="id"    column="id"    />
+        <result property="content"    column="content"    />
+        <result property="num"    column="num"    />
+        <result property="unitPrice"    column="unit_price"    />
+        <result property="totalPrice"    column="total_price"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectTbSiteManageVo">
+        select id, content, num, unit_price, total_price, remark, create_by, create_time from tb_site_manage
+    </sql>
+
+    <select id="selectTbSiteManageList" parameterType="com.ruoyi.site.domain.TbSiteManage" resultMap="TbSiteManageResult">
+        <include refid="selectTbSiteManageVo"/>
+        <where>  
+            <if test="content != null  and content != ''"> and content like '%' || #{content} || '%'</if>
+            <if test="num != null  and num != ''"> and num = #{num}</if>
+            <if test="unitPrice != null  and unitPrice != ''"> and unit_price = #{unitPrice}</if>
+            <if test="totalPrice != null  and totalPrice != ''"> and total_price = #{totalPrice}</if>
+        </where>
+    </select>
+    
+    <select id="selectTbSiteManageById" parameterType="String" resultMap="TbSiteManageResult">
+        <include refid="selectTbSiteManageVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTbSiteManage" parameterType="com.ruoyi.site.domain.TbSiteManage">
+        insert into tb_site_manage
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="content != null">content,</if>
+            <if test="num != null">num,</if>
+            <if test="unitPrice != null">unit_price,</if>
+            <if test="totalPrice != null">total_price,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="content != null">#{content},</if>
+            <if test="num != null">#{num},</if>
+            <if test="unitPrice != null">#{unitPrice},</if>
+            <if test="totalPrice != null">#{totalPrice},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTbSiteManage" parameterType="com.ruoyi.site.domain.TbSiteManage">
+        update tb_site_manage
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="content != null">content = #{content},</if>
+            <if test="num != null">num = #{num},</if>
+            <if test="unitPrice != null">unit_price = #{unitPrice},</if>
+            <if test="totalPrice != null">total_price = #{totalPrice},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTbSiteManageById" parameterType="String">
+        delete from tb_site_manage where id = #{id}
+    </delete>
+
+    <delete id="deleteTbSiteManageByIds" parameterType="String">
+        delete from tb_site_manage where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>
